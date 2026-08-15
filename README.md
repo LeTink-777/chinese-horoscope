@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Китайский гороскоп на 2026
 
-## Getting Started
+Воронка персонального прогноза по китайскому гороскопу на 2026 год Огненной Змеи.
+Next.js 16 (App Router) + TypeScript + Tailwind 4, оплата через ЮKassa.
 
-First, run the development server:
+## Страницы
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Путь | Что делает |
+| --- | --- |
+| `/` | Лендинг: круг зодиака, форма (имя, год рождения, email), разделы о годе Змеи, 12 знаков, состав прогноза, отзывы, FAQ |
+| `/result` | Расчёт знака и стихии, бесплатная часть прогноза, закрытые блоки и тарифы-хунбао |
+| `/thank-you` | Подтверждение оплаты, анимация красного конверта, апселл на разбор совместимости |
+| `/privacy`, `/offer` | Политика конфиденциальности и публичная оферта |
+| `/api/checkout` | Создание платежа в ЮKassa, возвращает `confirmationUrl` |
+| `/api/webhook` | Приём уведомлений от ЮKassa |
+
+## Логика расчёта
+
+`src/lib/chineseZodiac.ts`:
+
+- знак: `animals[(birthYear - 4) % 12]`;
+- стихия: `(birthYear - 4) % 10` → Дерево / Огонь / Земля / Металл / Вода;
+- совместимость с годом Змеи и прогноз на 2026 — в таблицах `COMPATIBILITY_BY_ANIMAL` и `YEAR_2026_BY_ANIMAL`.
+
+Символ 2026 года задан константой `YEAR_2026` — год-хозяин меняется только там
+и в таблице совместимости, остальной код на формулу года не завязан.
+
+## Переменные окружения
+
+```
+NEXT_PUBLIC_YUKASSA_SHOP_ID=1333494
+YUKASSA_SECRET_KEY=<секретный ключ магазина>
+YUKASSA_SEND_RECEIPT=false   # true — только если подключена фискализация
+NEXT_PUBLIC_SITE_URL=https://<домен>   # используется в return_url и canonical
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Локально — в `.env.local` (в git не попадает), на проде — в переменных Vercel.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Разработка
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev     # http://localhost:3000
+npm run build   # прод-сборка
+```
 
-## Learn More
+## Тарифы
 
-To learn more about Next.js, take a look at the following resources:
+| Тариф | Цена | Доставка |
+| --- | --- | --- |
+| Базовый прогноз (`basic`) | 290 ₽ | 24 часа |
+| Полный прогноз (`full`) | 590 ₽ | 12 часов |
+| Прогноз + разбор (`premium`) | 1290 ₽ | 6 часов |
+| Совместимость (`compat`, апселл) | 390 ₽ | 24 часа |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Цены и состав — в `src/lib/plans.ts`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Правила проекта
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- никаких эмодзи в интерфейсе — только иконки `lucide-react`;
+- вся типографика на переменных из `src/app/globals.css`;
+- иероглифы выводятся классом `.cjk` (системный CJK-шрифт, латиница и кириллица — Noto Serif SC).

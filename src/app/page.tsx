@@ -1,69 +1,176 @@
-import Image from "next/image";
+import {
+  Wallet,
+  Heart,
+  Briefcase,
+  Shield,
+  Calendar,
+  AlertTriangle,
+  Flame,
+} from 'lucide-react';
+import ZodiacWheel from '@/components/ZodiacWheel';
+import LandingForm from '@/components/LandingForm';
+import { BambooBackground, Lanterns, TopBar, Footer } from '@/components/Decor';
+import { ANIMALS, ANIMAL_CHARS, yearsForAnimal } from '@/lib/chineseZodiac';
+import { FAQ } from '@/lib/seo';
+
+const FEATURES = [
+  { Icon: Wallet, title: 'Финансы 2026', text: 'Денежные возможности и риски года: где придёт доход, а где утечка.' },
+  { Icon: Heart, title: 'Любовь и отношения', text: 'Что ждёт в личной жизни: пара, знакомство, разговор, который пора начать.' },
+  { Icon: Briefcase, title: 'Карьера', text: 'Профессиональные перспективы: рост, смена места, переговоры об условиях.' },
+  { Icon: Shield, title: 'Здоровье', text: 'На что обратить внимание именно твоему знаку в год Огненной Змеи.' },
+  { Icon: Calendar, title: 'Лучшие месяцы', text: 'Когда действовать: три периода, где усилие даёт максимальный результат.' },
+  { Icon: AlertTriangle, title: 'Опасные периоды', text: 'Когда быть осторожным: месяцы, где решения лучше отложить.' },
+];
+
+const QUOTES = [
+  { text: 'Прогноз на финансы оказался точным — в марте действительно пришли деньги.', author: 'Наталья, 34 года' },
+  { text: 'Предупреждение об августе спасло от плохой сделки.', author: 'Виктор, 41 год' },
+  { text: 'Лучшие и худшие месяцы совпали с реальностью на 90%.', author: 'Алёна, 29 лет' },
+];
+
+const THEMES = ['Трансформация', 'Мудрость', 'Финансовый рост', 'Осторожность'];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+      <BambooBackground />
+      <div className="page">
+        <TopBar />
+
+        <section className="hero">
+          <Lanterns />
+          <div className="shell hero-grid">
+            <div className="hero-wheel">
+              <ZodiacWheel size={300} />
+            </div>
+
+            <div>
+              <span className="hero-eyebrow">
+                <Flame size={13} /> 2026 · 火蛇
+              </span>
+
+              <h1 className="hero-title">
+                Что год Огненной
+                <br />
+                <em>Змеи</em> принесёт
+                <br />
+                именно тебе?
+              </h1>
+
+              <p className="hero-sub">
+                Введи год рождения — узнай свой знак китайского зодиака и персональный прогноз
+                на 2026
+              </p>
+              <p className="hero-note">2026 — год Огненной Змеи по китайскому календарю</p>
+
+              <LandingForm />
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="year">
+          <div className="shell">
+            <p className="eyebrow">Год-хозяин</p>
+            <h2 className="section-title">2026 — Год Огненной Змеи</h2>
+            <div className="card card-jade" style={{ marginTop: 22 }}>
+              <p className="card-text">
+                Змея в китайской традиции — знак не скорости, а точности. Год Огненной Змеи
+                убирает случайность: то, что держалось на удаче и обещаниях, в 2026 рассыпается,
+                а то, что построено на расчёте и репутации, наоборот, растёт быстрее обычного.
+                Огонь как стихия добавляет к холодной логике Змеи амбицию и публичность — это год,
+                когда тихие профессионалы вдруг становятся заметными.
+              </p>
+              <p className="card-text" style={{ marginTop: 14 }}>
+                Змея не даёт лёгких денег, но щедро платит за подготовку. Она проверяет договорённости
+                на прочность, обнажает недосказанное в отношениях и не прощает спешки в крупных решениях.
+                Тем, кто согласен на один такт медленнее, 2026 год открывает двери, которые были
+                закрыты последние два года.
+              </p>
+              <div className="theme-chips">
+                {THEMES.map((theme) => (
+                  <span className="chip" key={theme}>
+                    {theme}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="section-tight" id="animals">
+          <div className="shell">
+            <p className="eyebrow">Круг из двенадцати</p>
+            <h2 className="section-title">12 знаков китайского зодиака</h2>
+            <p className="section-sub">
+              Цикл повторяется каждые 12 лет. Найди свой год рождения — или просто введи его в форме выше.
+            </p>
+            <div className="animal-scroll">
+              {ANIMALS.map((animal, index) => (
+                <div className="animal-card" key={animal}>
+                  <div className="animal-char">{ANIMAL_CHARS[index]}</div>
+                  <div className="animal-name">{animal}</div>
+                  <div className="animal-years">
+                    {yearsForAnimal(index).join(' · ')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="included">
+          <div className="shell">
+            <p className="eyebrow">Состав прогноза</p>
+            <h2 className="section-title">Что входит в прогноз</h2>
+            <p className="section-sub">
+              Шесть сфер, разобранных под твой знак и твою стихию рождения.
+            </p>
+            <div className="grid-6">
+              {FEATURES.map(({ Icon, title, text }) => (
+                <div className="card" key={title}>
+                  <div className="feature-icon">
+                    <Icon size={20} />
+                  </div>
+                  <h3 className="card-title">{title}</h3>
+                  <p className="card-text">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="reviews">
+          <div className="shell">
+            <p className="eyebrow">Отзывы</p>
+            <h2 className="section-title">Что говорят о прогнозах</h2>
+            <div className="grid-6" style={{ marginTop: 24 }}>
+              {QUOTES.map((quote) => (
+                <blockquote className="quote" key={quote.author}>
+                  <p>{quote.text}</p>
+                  <span>— {quote.author}</span>
+                </blockquote>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="faq">
+          <div className="shell">
+            <p className="eyebrow">Вопросы</p>
+            <h2 className="section-title">Частые вопросы</h2>
+            <div style={{ display: 'grid', gap: 14, marginTop: 24, maxWidth: 780 }}>
+              {FAQ.map((item) => (
+                <div className="card card-gold" key={item.q}>
+                  <h3 className="card-title">{item.q}</h3>
+                  <p className="card-text">{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </div>
+    </>
   );
 }
