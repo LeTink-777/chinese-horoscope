@@ -35,6 +35,28 @@ function credentials(): { shopId: string; secretKey: string } {
   return { shopId, secretKey };
 }
 
+/**
+ * Читает платёж по идентификатору.
+ *
+ * Нужен, чтобы подтвердить: запрос на скачивание относится к реально
+ * оплаченному заказу, и чтобы взять данные покупателя из самого платежа,
+ * а не из тела запроса браузера.
+ */
+export async function getPayment(paymentId: string): Promise<YooKassaPayment | null> {
+  const { shopId, secretKey } = credentials();
+  const auth = Buffer.from(`${shopId}:${secretKey}`).toString('base64');
+
+  const response = await fetch(`${API_URL}/${encodeURIComponent(paymentId)}`, {
+    method: 'GET',
+    headers: { Authorization: `Basic ${auth}` },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) return null;
+
+  return (await response.json()) as YooKassaPayment;
+}
+
 export async function createPayment(input: CreatePaymentInput): Promise<YooKassaPayment> {
   const { shopId, secretKey } = credentials();
   const auth = Buffer.from(`${shopId}:${secretKey}`).toString('base64');

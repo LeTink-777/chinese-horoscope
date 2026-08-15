@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { Shield, RotateCcw, Star, Check, Timer } from 'lucide-react';
-import { readSpots, readTimerStart, TIMER_DURATION_MS, type ChineseUserData } from '@/lib/storage';
+import {
+  readSpots,
+  readTimerStart,
+  savePendingOrder,
+  TIMER_DURATION_MS,
+  type ChineseUserData,
+} from '@/lib/storage';
 import type { PlanId } from '@/lib/plans';
 import { PLANS } from '@/lib/plans';
 
@@ -73,10 +79,16 @@ export default function RedEnvelopes({ user, animal, chineseChar }: Props) {
         }),
       });
 
-      const payload = (await response.json()) as { confirmationUrl?: string; error?: string };
+      const payload = (await response.json()) as {
+        confirmationUrl?: string;
+        paymentId?: string;
+        error?: string;
+      };
       if (!response.ok || !payload.confirmationUrl) {
         throw new Error(payload.error ?? 'Не удалось создать платёж');
       }
+      // Нужен /thank-you, чтобы подтвердить оплату при скачивании PDF.
+      savePendingOrder({ plan, paymentId: payload.paymentId ?? null });
       window.location.href = payload.confirmationUrl;
     } catch (err) {
       setError(

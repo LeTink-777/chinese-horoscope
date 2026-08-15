@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle, Star, Mail } from 'lucide-react';
+import { CheckCircle, Download, Star, Mail } from 'lucide-react';
 import { BambooBackground, TopBar, Footer } from '@/components/Decor';
 import { calculateChinese, animalFromYear, ANIMAL_CHARS, animalIndexFromYear } from '@/lib/chineseZodiac';
-import { readUserData, type ChineseUserData } from '@/lib/storage';
+import { readPendingOrder, readUserData, type ChineseUserData } from '@/lib/storage';
 import { PLANS, COMPAT_PLAN } from '@/lib/plans';
+import { generateResultSections } from '@/lib/result-sections';
 
 const COINS = [
   { dx: '-146px', dy: '250px', rot: '220deg', delay: '0s', size: 16 },
@@ -33,9 +34,19 @@ export default function ThankYouPage() {
   const [partnerYear, setPartnerYear] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
+  const [storedPlan, setStoredPlan] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
 
   useEffect(() => {
     setUser(readUserData());
+
+    const order = readPendingOrder();
+    if (order) {
+      setPaymentId(order.paymentId);
+      setStoredPlan(order.plan);
+    }
 
     const planId = new URLSearchParams(window.location.search).get('plan');
     if (planId === 'basic' || planId === 'full' || planId === 'premium') {
@@ -46,6 +57,56 @@ export default function ThankYouPage() {
   }, []);
 
   const result = user ? calculateChinese(user.name, user.birthYear) : null;
+
+  // Тот же построитель, что использует PDF в письме — страница и вложение
+  // всегда показывают одно и то же.
+  const sections = useMemo(
+    () =>
+      user
+        ? generateResultSections(
+            { name: user.name, birthYear: user.birthYear },
+            storedPlan,
+          )
+        : [],
+    [user, storedPlan],
+  );
+
+  async function downloadPDF() {
+    if (!paymentId) {
+      setDownloadError(
+        'Не нашли номер платежа в этом браузере. Прогноз отправлен тебе на почту.',
+      );
+      return;
+    }
+
+    setDownloading(true);
+    setDownloadError('');
+
+    try {
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId }),
+      });
+
+      if (!response.ok) throw new Error(`PDF request failed with ${response.status}`);
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'kitayskiy-goroskop.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      // Немедленный revoke в некоторых браузерах отменяет загрузку.
+      window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } catch {
+      setDownloadError('Не удалось скачать PDF. Он также отправлен тебе на почту.');
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   async function buyCompatibility() {
     const year = Number.parseInt(partnerYear, 10);
@@ -141,7 +202,7 @@ export default function ThankYouPage() {
             <CheckCircle size={56} style={{ color: 'var(--accent-gold)' }} />
 
             <h1 style={{ fontSize: 28, color: 'var(--accent-cream)', marginTop: 16 }}>
-              {user ? `${user.name}, твой прогноз на 2026 готовится` : 'Твой прогноз на 2026 готовится'}
+              Оплата прошла успешно!
             </h1>
 
             {result ? (
@@ -157,10 +218,42 @@ export default function ThankYouPage() {
 
             <p style={{ color: 'var(--text-secondary)', marginTop: 20 }}>
               <Mail size={15} style={{ verticalAlign: -2, color: 'var(--accent-gold)' }} />{' '}
-              Пришлём на <span className="mono">{user?.email ?? 'твою почту'}</span> через{' '}
-              <span className="mono">{hours}</span>{' '}
-              {hours === 1 ? 'час' : hours < 5 ? 'часа' : 'часов'}
+              {user ? `${user.name}, твой` : 'Твой'} прогноз на 2026 открыт ниже.
+              Копия отправлена на <span className="mono">{user?.email ?? 'твою почту'}</span>
             </p>
+
+            <div style={{ marginTop: 24 }}>
+              <button
+                type="button"
+                onClick={downloadPDF}
+                disabled={downloading}
+                className="btn btn-gold"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
+              >
+                <Download size={18} />
+                {downloading ? 'Готовим PDF…' : 'Скачать PDF'}
+              </button>
+              {downloadError ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 10 }}>
+                  {downloadError}
+                </p>
+              ) : null}
+            </div>
+
+            {sections.length > 0 ? (
+              <section style={{ marginTop: 40, textAlign: 'left' }}>
+                {sections.map((section) => (
+                  <div key={section.title} className="card" style={{ marginBottom: 14 }}>
+                    <h2 className="card-title" style={{ color: 'var(--accent-gold)' }}>
+                      {section.title}
+                    </h2>
+                    <p className="card-text" style={{ whiteSpace: 'pre-line' }}>
+                      {section.content}
+                    </p>
+                  </div>
+                ))}
+              </section>
+            ) : null}
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 8 }}>
               Если письма нет — проверь папку «Спам» или напиши в Telegram @dvdkmv
             </p>
