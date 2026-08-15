@@ -85,6 +85,7 @@ export function Footer() {
       <div className="shell footer-inner">
         <span>Евдокимов Даниил Владимирович · ИНН 381928138362 · Самозанятый</span>
         <span style={{ display: 'flex', gap: 18 }}>
+          <Link href="/blog">Блог</Link>
           <Link href="/privacy">Политика конфиденциальности</Link>
           <Link href="/offer">Оферта</Link>
         </span>

@@ -5,7 +5,8 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      // /blog and /blog/* stay indexable; only the paid-flow pages are closed.
+      allow: ['/', '/blog'],
       disallow: ['/api/', '/result', '/thank-you'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
