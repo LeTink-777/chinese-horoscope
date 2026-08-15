@@ -1,4 +1,17 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://chinese-horoscope.vercel.app';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.kitayskiy-goroskop.ru';
+
+/** Канонический хост: апекс редиректится на www (см. next.config.ts). */
+export const SITE_HOST = 'www.kitayskiy-goroskop.ru';
+
+/**
+ * Хосты, на которые разрешено возвращать пользователя после оплаты.
+ * Всё остальное (в том числе подменённый заголовок Origin) откатывается на SITE_URL.
+ */
+export const ALLOWED_RETURN_HOSTS = [
+  'kitayskiy-goroskop.ru',
+  'www.kitayskiy-goroskop.ru',
+  'chinese-horoscope.vercel.app',
+];
 
 export const FAQ = [
   {

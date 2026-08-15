@@ -1,9 +1,34 @@
 import { NextResponse } from 'next/server';
 import { PAYABLE_PLANS } from '@/lib/plans';
 import { createPayment } from '@/lib/yukassa';
+import { ALLOWED_RETURN_HOSTS, SITE_URL } from '@/lib/seo';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+/**
+ * Возвращаем пользователя на тот домен, с которого он пришёл, но только если
+ * этот домен в белом списке — иначе подменённый Origin увёл бы клиента
+ * с оплаченным заказом на чужой сайт.
+ */
+function resolveReturnOrigin(request: Request): string {
+  const candidate = request.headers.get('origin') ?? new URL(request.url).origin;
+
+  try {
+    const { protocol, hostname, origin } = new URL(candidate);
+    const isLocalDev =
+      process.env.NODE_ENV !== 'production' &&
+      (hostname === 'localhost' || hostname === '127.0.0.1');
+
+    if (isLocalDev || (protocol === 'https:' && ALLOWED_RETURN_HOSTS.includes(hostname))) {
+      return origin;
+    }
+  } catch {
+    // Некорректный Origin — молча откатываемся на канонический адрес.
+  }
+
+  return SITE_URL;
+}
 
 interface CheckoutBody {
   plan?: string;
@@ -37,10 +62,7 @@ export async function POST(request: Request) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     return NextResponse.json({ error: 'Некорректный email' }, { status: 400 });
   }
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    request.headers.get('origin') ??
-    new URL(request.url).origin;
+  const origin = resolveReturnOrigin(request);
 
   try {
     const payment = await createPayment({

@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /result
-Disallow: /thank-you
-
-Sitemap: https://chinese-horoscope.vercel.app/sitemap.xml
